@@ -392,6 +392,14 @@ function flush(){ if(!SCORE_URL) return; const q=qGet(); if(!q.length) return;
   q.forEach(rec=>{ if(inflight.has(rec.id)) return; inflight.add(rec.id); fetch(SCORE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(rec)})
     .then(()=>{ qSet(qGet().filter(x=>x.id!==rec.id)); }).catch(()=>{}).finally(()=>inflight.delete(rec.id)); }); }
 window.addEventListener('online',flush);
+/* ───────── 마감 확인 (교사 시트 '설정' 탭 B1이 '마감'이면 닫힘) ───────── */
+let CLOSED=false;
+function checkStatus(){ if(!SCORE_URL) return;
+  fetch(SCORE_URL+'?status=1').then(r=>r.json()).then(d=>{ if(d&&d.status==='마감'){ CLOSED=true; if(!run||run.done) closedScreen(); } else { if(CLOSED){CLOSED=false; if(!run||run.done) home();} } }).catch(()=>{}); }
+function closedScreen(){
+  app.innerHTML=`<div class="hero"><span class="tag">역사① 복습 탐험</span><h1>세계사 <span>타임머신</span></h1></div>
+  <div class="card res" style="text-align:center"><div class="relic">🔒</div><h2>제출이 마감되었음</h2><p>이 탐험은 이제 할 수 없음. 궁금한 점은 선생님께 여쭤 보자</p></div>`;
+  window.scrollTo(0,0); }
 
 /* ───────── 도구 ───────── */
 const app=document.getElementById('app');
@@ -408,6 +416,7 @@ const doneCount=()=>S.filter(s=>mem.st[s.id]).length;
 
 /* ───────── 홈 ───────── */
 function home(){
+  if(CLOSED) return closedScreen();
   const ts=totalStars(), dc=doneCount();
   app.innerHTML=`
   <div class="hero"><span class="tag">역사① 복습 탐험</span>
@@ -437,6 +446,7 @@ function home(){
 /* ───────── 스테이션 진행 ───────── */
 let run=null;
 function start(id){
+  if(CLOSED) return closedScreen();
   if(mem.st[id]) return home();
   if(!mem.name){ alert('먼저 위의 탐험가 칸에 학번과 이름을 입력해 주세요.'); const n=document.getElementById('nm'); if(n) n.focus(); return; }
   const s=S.find(x=>x.id===id);
@@ -606,7 +616,7 @@ load();
 /* 새로 고침 등으로 중단된 시대도 교사 시트에 기록 */
 S.forEach(s=>{const r=mem.st[s.id]; if(r&&r.partial&&!r.sent){ r.sent=true; save();
   sendScore({id:'p'+s.id+'_'+Date.now().toString(36),name:mem.name,no:s.id,title:s.title,pts:0,max:r.max,stars:r.stars,complete:false,missed:'새로 고침 등으로 중단됨',total:totalStars()}); }});
-home(); flush();
+home(); flush(); checkStatus();
 </script>
 </body>
 </html>
