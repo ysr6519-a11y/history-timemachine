@@ -461,7 +461,7 @@ function step(){ const st=run.steps[run.i]; ({cho:stepCho,mc:stepMc,ox:stepOx,or
 /* 미션 1: 초성 퀴즈 */
 function stepCho(d){
   const [clue,ans,alts=[]]=d; const okSet=new Set([ans,...alts].map(norm));
-  const chars=[...ans]; let open=0, wrong=0, hinted=false, over=false;
+  const chars=[...ans]; let open=0, wrong=0, hinted=false, over=false; const tried=[];
   const hangulIdx=chars.map((c,i)=>isH(c)?i:-1).filter(i=>i>=0);
   frame('미션 1 초성 퀴즈',`<div class="q">${esc(clue)}</div><div class="cho" id="cho"></div>
     <div class="ans"><input id="in" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="정답 입력"><button class="btn" id="go">확인</button><button class="btn line" id="hint">💡 글자 힌트</button></div>
@@ -470,11 +470,11 @@ function stepCho(d){
   const draw=(all)=>{box.innerHTML=chars.map((c,i)=>c===' '?'<span class="sp"></span>':`<span class="${all||hangulIdx.indexOf(i)<open&&isH(c)?'open':''}">${esc(all||(isH(c)&&hangulIdx.indexOf(i)<open)?c:cho(c))}</span>`).join('');};
   draw(false);
   const end=(good)=>{over=true;draw(true);inp.disabled=true;document.getElementById('go').disabled=true;document.getElementById('hint').disabled=true;
-    const first=good&&wrong===0&&!hinted; if(first)run.pts++; else run.missed.push({q:clue,a:ans});
+    const first=good&&wrong===0&&!hinted; if(first)run.pts++; else run.missed.push({q:clue,a:ans,my:(tried.length?tried.join(', '):'')+(hinted?(tried.length?' (힌트 사용)':'힌트 사용'):'')+(good&&!first?' → 이후 정답':'')});
     fb.innerHTML=`<div class="msg ${good?'ok':'no'}">${good?(first?'⭐ 정답! 한 번에 맞힘':'정답! (힌트나 재도전으로 맞혀 점수는 없음)'):'아쉬움! 정답은 <b>'+esc(ans)+'</b>'}</div>`+nextBtn(); bindNext();};
   const check=()=>{ if(over)return; const v=norm(inp.value); if(!v)return;
     if(okSet.has(v)) return end(true);
-    wrong++; if(wrong>=3) return end(false);
+    tried.push(inp.value.trim()); wrong++; if(wrong>=3) return end(false);
     inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
     fb.innerHTML=`<div class="msg no">다시 생각해 보자! 남은 기회 ${3-wrong}번</div>`; inp.select(); };
   document.getElementById('go').onclick=check;
@@ -491,7 +491,7 @@ function stepMc(d){
     const pick=opts[+b.dataset.i]; const good=pick===right;
     app.querySelectorAll('.opt').forEach(x=>{x.classList.add('lock'); if(opts[+x.dataset.i]===right)x.classList.add('good');});
     if(!good)b.classList.add('bad');
-    judge(good,q,right,ex);
+    judge(good,q,right,ex,pick);
   });
 }
 function stepOx(d){
@@ -501,17 +501,17 @@ function stepOx(d){
     const pick=b.dataset.v==='1'; const good=pick===ans;
     app.querySelectorAll('.opt').forEach(x=>{x.classList.add('lock'); if((x.dataset.v==='1')===ans)x.classList.add('good');});
     if(!good)b.classList.add('bad');
-    judge(good,q,ans?'O':'X',ex);
+    judge(good,q,ans?'O':'X',ex,pick?'O':'X');
   });
 }
-function judge(good,q,a,ex){
-  if(good)run.pts++; else run.missed.push({q,a,ex});
+function judge(good,q,a,ex,my){
+  if(good)run.pts++; else run.missed.push({q,a,ex,my});
   document.getElementById('fb').innerHTML=`<div class="msg ${good?'ok':'no'}"><b>${good?'⭐ 정답!':'아쉬움! 정답은 '+esc(a)}</b>${ex?'<br>'+esc(ex):''}</div>`+nextBtn(); bindNext();
 }
 
 /* 미션 3-가: 순서 맞추기 */
 function stepOrder(d){
-  const items=d.items; let pool=mixed(items), placed=[], tries=0, over=false, marks=null;
+  const items=d.items; let pool=mixed(items), placed=[], tries=0, over=false, marks=null, firstTry='';
   frame('미션 3 순서 맞추기',`<div class="q">${esc(d.title)}</div><div class="msg tip">아래 카드를 일어난 순서대로 누르자. 잘못 놓은 칸은 다시 누르면 빠짐</div>
     <div class="slots" id="sl"></div><div class="pool" id="pl"></div>
     <div class="next"><button class="btn" id="ck" disabled>확인</button></div><div id="fb"></div>`);
@@ -526,9 +526,9 @@ function stepOrder(d){
   };
   draw();
   ck.onclick=()=>{
-    marks=placed.map((p,i)=>p===items[i]); const good=marks.every(Boolean); tries++;
+    marks=placed.map((p,i)=>p===items[i]); const good=marks.every(Boolean); tries++; if(tries===1) firstTry=placed.join(' → ');
     if(good||tries>=3){ over=true; const got=good?(tries===1?2:tries===2?1:0):0; run.pts+=got;
-      if(!good){placed=items.slice();marks=items.map(()=>true);} if(got<2)run.missed.push({q:d.title,a:items.join(' → ')});
+      if(!good){placed=items.slice();marks=items.map(()=>true);} if(got<2)run.missed.push({q:d.title,a:items.join(' → '),my:'첫 시도: '+firstTry+(good?' → '+tries+'번째에 성공':' → 3번 모두 실패')});
       draw(); ck.style.display='none';
       fb.innerHTML=`<div class="msg ${good?'ok':'no'}"><b>${good?(tries===1?'⭐⭐ 완벽! 한 번에 성공':'성공! '+tries+'번째 시도'):'올바른 순서를 위에 표시함. 한 번 더 읽어 보자'}</b></div>`+nextBtn(); bindNext();
     } else { draw(); fb.innerHTML=`<div class="msg no">빨간 칸의 순서가 맞지 않음. 눌러서 뺀 뒤 다시 놓아 보자 (남은 기회 ${3-tries}번)</div>`; }
@@ -538,7 +538,7 @@ function stepOrder(d){
 /* 미션 3-나: 짝 맞추기 */
 function stepMatch(d){
   const L=shuffle(d.pairs.map(p=>p[0])), R=mixed(d.pairs.map(p=>p[1])); const map=new Map(d.pairs);
-  let sel=null, miss=0, left=d.pairs.length;
+  let sel=null, miss=0, left=d.pairs.length; const wrongs=[];
   frame('미션 3 짝 맞추기',`<div class="q">${esc(d.title)}</div><div class="msg tip">왼쪽 카드를 누른 뒤, 알맞은 오른쪽 카드를 누르자</div>
     <div class="cols"><div>${L.map((x,i)=>`<button class="mt l" data-i="${i}">${esc(x)}</button>`).join('')}</div><div>${R.map((x,i)=>`<button class="mt r" data-i="${i}">${esc(x)}</button>`).join('')}</div></div><div id="fb"></div>`);
   const fb=document.getElementById('fb');
@@ -547,9 +547,9 @@ function stepMatch(d){
     if(!sel){fb.innerHTML='<div class="msg tip">먼저 왼쪽 카드를 골라 보자</div>';return;}
     if(map.get(L[+sel.dataset.i])===R[+b.dataset.i]){
       sel.classList.remove('sel');sel.classList.add('fix');b.classList.add('fix');sel=null;left--;fb.innerHTML='';
-      if(left===0){const got=miss<=1?2:miss<=3?1:0; run.pts+=got; if(got<2)run.missed.push({q:d.title,a:d.pairs.map(p=>p[0]+' – '+p[1]).join(' / ')});
+      if(left===0){const got=miss<=1?2:miss<=3?1:0; run.pts+=got; if(got<2)run.missed.push({q:d.title,a:d.pairs.map(p=>p[0]+' – '+p[1]).join(' / '),my:'잘못 짝지음: '+wrongs.join('; ')});
         fb.innerHTML=`<div class="msg ok"><b>${got===2?'⭐⭐ 훌륭함! 모두 짝지음':'모두 짝지음! (틀린 횟수 '+miss+'번)'}</b></div>`+nextBtn(); bindNext();}
-    } else { miss++; b.classList.add('bad'); setTimeout(()=>b.classList.remove('bad'),500); fb.innerHTML='<div class="msg no">짝이 아님. 다시 골라 보자</div>'; }
+    } else { miss++; wrongs.push(L[+sel.dataset.i]+'–'+R[+b.dataset.i]); b.classList.add('bad'); setTimeout(()=>b.classList.remove('bad'),500); fb.innerHTML='<div class="msg no">짝이 아님. 다시 골라 보자</div>'; }
   });
 }
 
@@ -561,7 +561,7 @@ function finish(){
   mem.st[s.id]={stars:st,pts,max,missed};
   save();
   sendScore({id:Date.now().toString(36)+Math.random().toString(36).slice(2,8),name:mem.name,no:s.id,title:s.title,pts,max,stars:st,
-    complete:run.i>=run.steps.length,missed:missed.map(m=>m.q).join(' / '),total:totalStars()});
+    complete:run.i>=run.steps.length,missed:missed.map(m=>m.q+' [정답: '+m.a+(m.my?' / 학생 답: '+m.my:'')+']').join(' / '),total:totalStars()});
   const all=doneCount()===S.length;
   app.innerHTML=`<div class="top"><button class="back" id="bk">← 지도</button><span class="name">${s.em} ${esc(s.title)}</span></div>
   <div class="card res">
@@ -569,7 +569,7 @@ function finish(){
     <div class="relic">${s.relic[0]}</div>
     <h2>${first?'유물 획득!':'탐험 완료!'} 「${esc(s.relic[1])}」</h2>
     <p><b>${pts}점</b> / ${max}점 ${st===3?'· 이 시대는 완벽하게 정복함':st===2?'· 조금만 더 하면 별 3개':'· 아래 오답을 꼭 다시 읽어 보자'}</p>
-    ${missed.length?`<div class="miss"><h3>📒 다시 볼 내용 ${missed.length}개</h3>${missed.map(m=>`<div>${esc(m.q)}<br><b>→ ${esc(m.a)}</b></div>`).join('')}</div>`:'<p>틀린 문제 없음!</p>'}
+    ${missed.length?`<div class="miss"><h3>📒 다시 볼 내용 ${missed.length}개</h3>${missed.map(m=>`<div>${esc(m.q)}<br><b>→ ${esc(m.a)}</b>${m.my?`<br><span style="color:#b0413e;font-size:.92em">내 답: ${esc(m.my)}</span>`:''}</div>`).join('')}</div>`:'<p>틀린 문제 없음!</p>'}
   </div>
   <div class="row"><button class="btn" id="hm">🗺️ 지도로</button>${all?'<button class="btn" id="ct">🏆 수료증 보기</button>':''}</div>`;
   document.getElementById('bk').onclick=home; document.getElementById('hm').onclick=home;
