@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>세계사 타임머신 — 역사① 복습 탐험</title>
+<style>
+:root{
+  --night:#141a33; --night2:#1f2850; --gold:#f2c14e; --gold2:#ffe29a; --cream:#fbf6e9;
+  --ink:#232842; --mute:#6b7190; --ok:#2e9e6b; --okbg:#e2f6ec; --no:#d1495b; --nobg:#fde8eb;
+  --line:#e4dcc6; --chip:#eef0fb;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:#232a55}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  color:var(--ink); font-size:18px; line-height:1.55;
+  background:
+    radial-gradient(2px 2px at 12% 18%,#fff8 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 78% 9%,#fff9 50%,transparent 51%),
+    radial-gradient(2px 2px at 64% 42%,#fff6 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 30% 66%,#fff7 50%,transparent 51%),
+    radial-gradient(2px 2px at 90% 78%,#fff6 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 8% 88%,#fff8 50%,transparent 51%),
+    linear-gradient(160deg,var(--night),var(--night2) 60%,#2b2a5e);
+  background-attachment:fixed;
+}
+#app{max-width:900px;margin:0 auto;padding:20px 16px 60px}
+button{font:inherit;cursor:pointer;border:0}
+h1,h2,h3{margin:0;line-height:1.25}
+
+/* 홈 */
+.hero{text-align:center;color:#fff;padding:18px 0 8px}
+.hero .tag{display:inline-block;border:1px solid var(--gold);color:var(--gold2);border-radius:99px;padding:3px 14px;font-size:14px;letter-spacing:.08em}
+.hero h1{font-size:clamp(34px,7vw,52px);margin:12px 0 6px;letter-spacing:-.02em}
+.hero h1 span{color:var(--gold)}
+.hero p{margin:0;color:#cfd3ee;font-size:17px}
+.panel{background:var(--cream);border-radius:20px;padding:18px 20px;margin-top:18px;box-shadow:0 10px 30px #0006}
+.who{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.who label{font-weight:700}
+.who input{flex:1;min-width:180px;font:inherit;padding:10px 14px;border:2px solid var(--line);border-radius:12px;background:#fff}
+.stat{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.stat .big{font-size:24px;font-weight:800}
+.bar{flex:1;min-width:160px;height:14px;background:#e9e2cd;border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#f08a4b);border-radius:99px;transition:width .4s}
+.relics{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.relics span{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:24px;background:#efe8d3;filter:grayscale(1);opacity:.35}
+.relics span.on{filter:none;opacity:1;background:#fff3cf;box-shadow:inset 0 0 0 2px var(--gold)}
+.howto{margin:12px 0 0;padding-left:20px;color:#4a4f6b;font-size:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:18px}
+.st{background:var(--cream);border-radius:18px;padding:16px;text-align:left;display:flex;gap:14px;align-items:center;box-shadow:0 6px 18px #0005;transition:transform .12s;position:relative;color:var(--ink)}
+.st:active{transform:scale(.97)}
+.st .em{font-size:40px;width:60px;height:60px;border-radius:16px;background:#fff;display:grid;place-items:center;flex:none;box-shadow:inset 0 0 0 2px var(--line)}
+.st .no{font-size:13px;color:var(--mute);font-weight:700;letter-spacing:.06em}
+.st .ti{font-size:19px;font-weight:800;line-height:1.25;word-break:keep-all}
+.st .stars{font-size:18px;letter-spacing:2px;color:#cfc7ad}
+.st .stars b{color:#f0a500}
+.st.done{box-shadow:0 0 0 3px var(--gold),0 6px 18px #0005}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;justify-content:center}
+.btn{background:var(--gold);color:#3a2a00;font-weight:800;padding:13px 22px;border-radius:14px;font-size:18px;box-shadow:0 4px 0 #c9962a}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #c9962a}
+.btn.ghost{background:#ffffff1c;color:#fff;box-shadow:inset 0 0 0 2px #ffffff55}
+.btn.line{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 2px var(--line)}
+.btn[disabled]{opacity:.45;pointer-events:none}
+
+/* 스테이션 */
+.top{display:flex;align-items:center;gap:12px;color:#fff;margin-bottom:12px}
+.top .back{background:#ffffff1c;color:#fff;border-radius:12px;padding:8px 14px;font-weight:700;box-shadow:inset 0 0 0 2px #ffffff44}
+.top .name{font-weight:800;font-size:19px;flex:1}
+.top .pt{color:var(--gold2);font-weight:800}
+.prog{height:10px;background:#ffffff22;border-radius:99px;overflow:hidden;margin-bottom:14px}
+.prog i{display:block;height:100%;background:var(--gold);transition:width .3s}
+.card{background:var(--cream);border-radius:22px;padding:24px 22px;box-shadow:0 10px 30px #0006}
+.kind{display:inline-block;background:var(--night);color:var(--gold2);border-radius:99px;padding:4px 14px;font-size:14px;font-weight:700;margin-bottom:12px}
+.q{font-size:clamp(21px,3.6vw,26px);font-weight:800;line-height:1.4;word-break:keep-all}
+.cho{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 16px}
+.cho span{min-width:52px;height:60px;padding:0 6px;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 2px var(--line);display:grid;place-items:center;font-size:30px;font-weight:800;color:var(--night)}
+.cho span.sp{min-width:14px;background:none;box-shadow:none}
+.cho span.open{background:#fff3cf;box-shadow:inset 0 0 0 2px var(--gold)}
+.ans{display:flex;gap:10px;flex-wrap:wrap}
+.ans input{flex:1;min-width:200px;font:inherit;font-size:22px;padding:12px 16px;border-radius:14px;border:3px solid var(--night);background:#fff}
+.ans input:focus{outline:3px solid var(--gold)}
+.msg{margin-top:16px;padding:14px 16px;border-radius:14px;font-size:18px;word-break:keep-all}
+.msg.ok{background:var(--okbg);color:#14603f}
+.msg.no{background:var(--nobg);color:#8f2434}
+.msg.tip{background:var(--chip);color:#3b4270}
+.msg b{font-weight:800}
+.shake{animation:sh .3s}
+@keyframes sh{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.opts{display:grid;gap:10px;margin-top:20px}
+.opts.ox{grid-template-columns:1fr 1fr}
+.opt{background:#fff;border-radius:14px;padding:15px 18px;text-align:left;font-size:20px;font-weight:600;box-shadow:inset 0 0 0 2px var(--line);color:var(--ink);word-break:keep-all}
+.opts.ox .opt{text-align:center;font-size:44px;font-weight:900;padding:18px}
+.opt.good{background:var(--okbg);box-shadow:inset 0 0 0 3px var(--ok)}
+.opt.bad{background:var(--nobg);box-shadow:inset 0 0 0 3px var(--no)}
+.opt.lock{pointer-events:none}
+.next{margin-top:18px;text-align:right}
+
+.slots{display:grid;gap:8px;margin:18px 0 6px}
+.slot{display:flex;gap:12px;align-items:center;min-height:54px;background:#fff;border-radius:14px;padding:8px 14px;box-shadow:inset 0 0 0 2px var(--line);font-size:19px;font-weight:600;text-align:left;color:var(--ink);width:100%}
+.slot i{font-style:normal;width:30px;height:30px;border-radius:50%;background:var(--night);color:var(--gold2);display:grid;place-items:center;font-size:15px;font-weight:800;flex:none}
+.slot.empty{color:#b3ad98;font-weight:400;background:#f4eedb}
+.slot.good{background:var(--okbg);box-shadow:inset 0 0 0 3px var(--ok)}
+.slot.bad{background:var(--nobg);box-shadow:inset 0 0 0 3px var(--no)}
+.pool{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;min-height:20px}
+.chip{background:var(--night);color:#fff;border-radius:12px;padding:11px 15px;font-size:18px;font-weight:600;text-align:left}
+.cols{display:grid;grid-template-columns:1fr 1.25fr;gap:12px;margin-top:18px}
+.cols>div{display:grid;gap:9px;align-content:start}
+.mt{background:#fff;border-radius:14px;padding:13px 14px;font-size:18px;font-weight:700;box-shadow:inset 0 0 0 2px var(--line);text-align:left;min-height:58px;color:var(--ink);word-break:keep-all}
+.mt.r{font-weight:500}
+.mt.sel{box-shadow:inset 0 0 0 3px var(--gold);background:#fff7dc}
+.mt.fix{background:var(--okbg);box-shadow:inset 0 0 0 2px var(--ok);pointer-events:none;color:#14603f}
+.mt.bad{background:var(--nobg);box-shadow:inset 0 0 0 3px var(--no)}
+
+/* 결과 */
+.res{text-align:center}
+.res .bigstars{font-size:58px;letter-spacing:8px;color:#d9d1b6}
+.res .bigstars b{color:#f0a500}
+.res .relic{font-size:70px;margin-top:4px}
+.res h2{font-size:28px;margin-top:6px}
+.res p{margin:6px 0;color:#4a4f6b}
+.miss{text-align:left;margin-top:16px;display:grid;gap:8px}
+.miss div{background:#fff;border-radius:12px;padding:10px 14px;box-shadow:inset 0 0 0 2px var(--line);font-size:17px}
+.miss div b{color:var(--no)}
+.miss h3{font-size:18px}
+.sect{margin-top:18px}
+.sect h3{color:var(--gold2);font-size:18px;margin-bottom:8px}
+.cert{border:6px double #c9962a;border-radius:16px;padding:26px 20px;text-align:center;background:#fffdf5}
+.cert .t{letter-spacing:.3em;color:#a37712;font-weight:800}
+.cert h2{font-size:34px;margin:10px 0}
+.cert .nm{font-size:26px;font-weight:800;border-bottom:2px solid var(--ink);display:inline-block;padding:0 18px 2px;margin:8px 0}
+@media (max-width:560px){.cols{grid-template-columns:1fr 1fr}.mt{font-size:16px;padding:10px}.q{font-size:20px}}
+@media print{body{background:#fff}.top,.row,.hero{display:none}.card{box-shadow:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ───────── 설정 ─────────
+   완료 확인용 설문(구글 폼 등) 주소를 넣으면 수료증 화면에 '완료 제출하기' 버튼이 생김. 비워 두면 표시되지 않음. */
+const FORM_URL = "";
+
+/* ───────── 문제 데이터 ─────────
+   cho : [단서, 정답, [인정 답안]]            → 초성 퀴즈
+   quiz: [질문, [정답, 오답, 오답, 오답], 해설]  → 선택형 (보기는 실행 때 섞임)
+         [문장, true/false, 해설]              → OX
+   sp  : {type:'order', items:[올바른 순서]} / {type:'match', pairs:[[왼쪽, 오른쪽]]} */
+const S = [
+{id:1, em:'🕌', title:'세 대륙을 지배한 오스만 제국', relic:['🕌','블루모스크의 타일'],
+ cho:[
+  ['오스만 제국의 군주가 사용한 칭호','술탄'],
+  ['1453년 비잔티움 제국을 멸망시킨 술탄','메흐메트 2세',['메흐메드 2세','메메트 2세']],
+  ['콘스탄티노폴리스를 고쳐 부른 이름으로, 오스만 제국의 수도','이스탄불'],
+  ['크리스트교 청소년 등을 징집하여 길러 낸 술탄의 친위 부대','예니체리'],
+  ['비이슬람교도가 이것만 내면 신앙을 인정받을 수 있었던 세금','지즈야'],
+  ['같은 종교를 믿는 사람들끼리 자치를 허용받은 종교 공동체','밀레트',['밀레트 제도','밀레트제']],
+  ['기병에게 토지의 징세권을 주고 그 대가로 군역을 지게 한 제도','티마르제',['티마르','티마르 제도']]],
+ quiz:[
+  ['셀림 1세의 업적으로 알맞은 것은?',['이집트 맘루크 왕조 정복, 메카·메디나 보호권 장악','비잔티움 제국 멸망','헝가리 정복과 빈 포위 공격','이스탄불로 수도 이전'],'셀림 1세는 사파비 왕조의 이스마일 1세를 제압하고 맘루크 왕조를 정복하여 이슬람 세계의 지배자로 군림함.'],
+  ['술레이만 1세가 포위 공격하였으나 점령하지 못한 도시는?',['빈','이스탄불','메카','마드리드'],'술레이만 1세는 헝가리를 정복한 뒤 빈을 포위 공격하였으나 점령에는 실패함.'],
+  ['오스만 제국이 쇠퇴하게 된 계기가 아닌 것은?',['유럽의 연합 함대 격퇴','레판토 해전 패배','2차 빈 포위 공격 실패','헝가리 상실'],'유럽 연합 함대 격퇴는 술레이만 1세 때 지중해 해상권을 장악한 전성기의 일임.'],
+  ['데브시르메제는 이슬람교 청소년을 징집하여 관료와 군인으로 기르던 제도이다.',false,'크리스트교 청소년 등을 징집하여 예니체리와 관료로 육성한 제도임.'],
+  ['오스만 제국은 이슬람 문화를 바탕으로 튀르크·페르시아·비잔티움 문화를 융합하였다.',true,'비잔티움 양식을 도입한 술탄 아흐메트 사원(블루모스크)이 대표적임.']],
+ sp:{type:'match', title:'술탄·제도와 알맞은 설명을 짝지어 보자', pairs:[
+  ['메흐메트 2세','비잔티움 제국을 멸망시킴'],['셀림 1세','이집트 맘루크 왕조를 정복함'],['술레이만 1세','헝가리 정복, 빈 포위 공격'],
+  ['티마르제','징세권을 받는 대신 군역 복무'],['데브시르메제','크리스트교 청소년 징집'],['관용 정책','다양한 민족의 언어·종교·전통 인정']]}},
+
+{id:2, em:'🎨', title:'르네상스와 종교 개혁', relic:['🎨','르네상스 화가의 팔레트'],
+ cho:[
+  ['‘부활’, ‘재생’이라는 뜻을 가진 14~16세기의 그리스·로마 고전 문화 부흥 운동','르네상스'],
+  ['신 중심의 문화에서 벗어나 인간의 개성과 감정을 중시하는 사상','인문주의'],
+  ['『군주론』을 쓴 이탈리아의 인물','마키아벨리'],
+  ['『우신예찬』에서 교황과 교회를 비판한 인물','에라스뮈스',['에라스무스']],
+  ['교황 레오 10세가 성 베드로 성당 증축 비용을 마련하려고 판매한 것','면벌부',['면죄부']],
+  ['칼뱅이 주장한 교리로, 근면하고 절제 있는 직업 윤리를 강조함','예정설'],
+  ['프랑스에서 위그노에게 신앙의 자유를 부분적으로 허용한 칙령','낭트 칙령']],
+ quiz:[
+  ['루터가 1517년 면벌부 판매를 비판하며 발표한 것은?',['95개조 반박문','권리 장전','인민헌장','낭트 칙령'],'루터의 95개조 반박문 발표로 종교 개혁이 시작됨.'],
+  ['루터파가 공식적으로 인정받은 계기는?',['아우크스부르크 화의','베스트팔렌 조약','낭트 칙령','수장법'],'1555년 아우크스부르크 화의에서 루터파가 공식 인정됨.'],
+  ['30년 전쟁을 끝내며 체결된 조약으로, 네덜란드 독립과 칼뱅파를 인정한 것은?',['베스트팔렌 조약','파리 조약','난징 조약','베르사유 조약'],'1648년 베스트팔렌 조약으로 유럽에 종교적 관용이 자리 잡음.'],
+  ['알프스 이북의 르네상스는 현실 사회와 교회를 비판하는 개혁적인 성격이 강하였다.',true,'교황의 권위와 봉건 사회의 관습이 강했던 알프스 이북에서는 사회·교회 비판이 두드러짐.'],
+  ['칼뱅의 주장은 경제적 성공을 신의 은총으로 보았기 때문에 상공업자들의 호응을 얻었다.',true,'예정설은 근면·절제의 직업 윤리를 강조하여 상공업자에게 환영받음.'],
+  ['영국의 종교 개혁은 국왕 헨리 8세가 로마 가톨릭교회의 권위를 더욱 강화하는 방향으로 이루어졌다.',false,'헨리 8세는 로마 가톨릭교회에서 벗어나 영국 국교회를 세움.']],
+ sp:{type:'match', title:'작품과 작가를 짝지어 보자', pairs:[
+  ['『군주론』','마키아벨리'],['모나리자','레오나르도 다 빈치'],['피에타','미켈란젤로'],['『데카메론』','보카치오'],['『유토피아』','토마스 모어'],['『돈키호테』','세르반테스']]}},
+
+{id:3, em:'👑', title:'재정·군사 국가와 과학 혁명', relic:['👑','태양왕의 왕관'],
+ cho:[
+  ['관세를 높여 수입을 줄이고 국내 상공업을 보호·육성한 경제 정책','중상주의',['중상주의 정책','중상주의 경제 정책']],
+  ['재정·군사 국가가 관료제와 함께 정비한, 평상시에도 유지하는 군대','상비군'],
+  ['의회파를 이끌어 내전에서 승리하고 호국경에 취임한 인물','크롬웰'],
+  ['명예혁명 때 의회가 요구하여 승인받은 문서 (입헌 군주제의 토대)','권리 장전'],
+  ['루이 14세가 믿은 것으로, 왕의 권력은 신에게서 받았다는 사상','왕권신수설'],
+  ['서유럽의 제도를 받아들이고 상트페테르부르크를 건설한 러시아의 군주','표트르 대제',['표트르','표트르 1세']],
+  ['몽테스키외가 주장한, 입법·사법·행정을 나누는 원리','삼권 분립']],
+ quiz:[
+  ['에스파냐의 무적함대를 격파하고 동인도 회사를 설립한 영국의 왕은?',['엘리자베스 1세','헨리 8세','찰스 1세','제임스 2세'],'엘리자베스 1세는 칼레 해전에서 무적함대를 격파함.'],
+  ['“나는 국가 제일의 심부름꾼”이라며 계몽 군주를 자처한 프로이센의 왕은?',['프리드리히 2세','루이 14세','표트르 대제','펠리페 2세'],'프리드리히 2세는 슐레지엔을 확보하고 상수시 궁전을 건설함.'],
+  ['『천체의 회전에 관하여』에서 지동설을 주장한 인물은?',['코페르니쿠스','뉴턴','볼테르','몽테스키외'],'뉴턴은 만유인력의 법칙을 발견하여 지동설을 입증함.'],
+  ['재정·군사 국가의 특징이 아닌 것은?',['봉건 영주에게 권력을 나누어 줌','관료제와 상비군 정비','중상주의 경제 정책 실시','상공 시민 계층 지원'],'재정·군사 국가는 권력을 중앙으로 모은 중앙 집권 국가임.'],
+  ['루이 14세가 낭트 칙령을 폐지하자 위그노가 프랑스를 떠나 국내 산업이 위축되었다.',true,'여기에 무리한 전쟁까지 겹쳐 국력이 낭비됨.'],
+  ['동유럽은 서유럽보다 도시와 상공업이 발달하여 시민 세력의 힘이 강하였다.',false,'동유럽은 상공업 발달이 부진하고 시민 세력이 미약하여 군주가 직접 개혁에 나섬(계몽 군주).']],
+ sp:{type:'order', title:'영국 혁명의 흐름을 순서대로 놓아 보자', items:[
+  '의회가 권리 청원 제출','왕당파와 의회파의 내전','찰스 1세 처형, 공화정 수립','크롬웰의 호국경 취임과 독재','의회가 제임스 2세 폐위','권리 장전 승인']}},
+
+{id:4, em:'🗽', title:'미국 혁명과 프랑스 혁명', relic:['📜','인간과 시민의 권리 선언'],
+ cho:[
+  ['차세에 반발한 식민지인들이 보스턴 항구에서 일으킨 사건','보스턴 차 사건'],
+  ['독립 전쟁의 총사령관이자 미국의 초대 대통령','조지 워싱턴',['워싱턴']],
+  ['재정이 어려워진 루이 16세가 소집한 신분제 의회','삼부회'],
+  ['제3신분이 헌법을 만들기 전에는 해산하지 않겠다고 한 서약','테니스코트의 서약',['테니스코트 서약']],
+  ['분노한 파리 민중이 습격한 감옥','바스티유 감옥',['바스티유']],
+  ['공안 위원회를 설치하고 공포 정치를 실시한 인물','로베스피에르'],
+  ['쿠데타를 일으켜 총재 정부를 무너뜨리고 통령 정부를 세운 인물','나폴레옹']],
+ quiz:[
+  ['영국의 세금 부과에 맞서 식민지인들이 내세운 구호는?',['대표 없는 곳에 과세 없다','나는 국가 제일의 심부름꾼','청을 도와 서양을 물리치자','만주족을 멸하고 한족을 일으키자'],'영국이 인지세, 차세 등을 부과하자 식민지인들이 반발함.'],
+  ['미국의 독립을 승인한 조약은?',['파리 조약','베르사유 조약','베스트팔렌 조약','포츠머스 강화 조약'],'요크타운 전투 승리 뒤 파리 조약으로 독립을 승인받음.'],
+  ['삼부회에서 제3신분이 주장한 표결 방식은?',['머릿수대로 표결','신분별로 표결','국왕이 단독 결정','추첨으로 결정'],'제1·2신분은 신분별 표결을 주장하여 대립함.'],
+  ['프랑스 혁명의 세 가지 이념은?',['자유, 평등, 우애','자유, 질서, 번영','평등, 충성, 신앙','민족, 민권, 민생'],'이 이념 아래 봉건적 구제도를 무너뜨리고 시민 사회의 토대를 마련함.'],
+  ['프랑스 혁명의 성과는 노동자, 농민, 여성 모두에게 똑같이 적용되었다.',false,'혁명의 성과는 일부 부유한 시민 계급에 한정되었다는 한계가 있음.'],
+  ['미국 독립 선언문에는 인간 평등, 천부 인권, 국민 주권, 저항권이 담겨 있다.',true,'독립 선언문에는 민주주의의 원리가 담겨 있음.']],
+ sp:{type:'order', title:'프랑스 혁명의 전개를 순서대로 놓아 보자', items:[
+  '루이 16세의 삼부회 소집','테니스코트의 서약','바스티유 감옥 습격','인간과 시민의 권리 선언 발표','국민 공회의 공화정 선포, 루이 16세 처형','로베스피에르의 공포 정치','총재 정부 수립']}},
+
+{id:5, em:'⚔️', title:'나폴레옹과 유럽의 국민 국가', relic:['🎩','나폴레옹의 모자'],
+ cho:[
+  ['나폴레옹이 프랑스 혁명의 성과를 반영하여 편찬한 법전','나폴레옹 법전'],
+  ['나폴레옹이 영국을 고립시키려고 발표한 명령','대륙 봉쇄령'],
+  ['빈 회의를 주최한 오스트리아의 재상','메테르니히'],
+  ['영국 노동자들이 인민헌장을 발표하며 선거권을 요구한 운동','차티스트 운동',['차티스트']],
+  ['붉은 셔츠단을 이끌고 나폴리와 시칠리아를 점령한 인물','가리발디'],
+  ['철혈 정책으로 독일 통일을 이끈 프로이센의 재상','비스마르크'],
+  ['러시아의 알렉산드르 2세가 농노를 풀어 주며 발표한 것','농노 해방령']],
+ quiz:[
+  ['빈 체제의 성격으로 알맞은 것은?',['유럽을 프랑스 혁명 이전 상태로 되돌리려 함','자유주의와 민족주의를 적극 지원함','모든 나라에 공화정을 세움','식민지의 독립을 보장함'],'빈 체제는 자유주의와 민족주의를 탄압함.'],
+  ['프랑스 7월 혁명(1830)의 결과는?',['샤를 10세 추방, 루이 필리프 옹립','공화정 수립, 빈 체제 붕괴','나폴레옹의 황제 즉위','루이 16세 처형'],'7월 혁명으로 입헌 군주제에 기반한 7월 왕정이 수립됨.'],
+  ['프랑스 2월 혁명(1848)의 영향이 아닌 것은?',['빈 체제가 더욱 강화됨','프랑스에 공화정 수립','메테르니히 실각','자유주의와 민족주의 확산'],'2월 혁명의 영향으로 빈 체제는 붕괴됨.'],
+  ['빌헬름 1세가 독일 제국의 황제로 즉위한 장소는?',['베르사유 궁전','상수시 궁전','빈','프랑크푸르트'],'프로이센은 프랑스와의 전쟁에서 승리한 뒤 베르사유 궁전에서 독일 제국을 선포함(1871).'],
+  ['사르데냐의 재상으로 북부·중부 이탈리아를 통합한 인물은?',['카부르','가리발디','비스마르크','메테르니히'],'카부르는 프랑스의 도움을 받아 오스트리아와의 전쟁에서 승리함.'],
+  ['러시아의 지식인들은 농민을 계몽하여 사회를 바꾸려는 브나로드 운동을 벌였다.',true,'알렉산드르 2세 암살 뒤 전제 정치가 강화되자 지식인들이 농민 계몽에 나섬.']],
+ sp:{type:'order', title:'나폴레옹의 일생을 순서대로 놓아 보자', items:[
+  '쿠데타로 통령 정부 수립','국민 투표로 황제 즉위','트라팔가르 해전 패배','대륙 봉쇄령 발표','러시아 원정 실패','엘바섬 유배와 탈출','워털루 전투 패배']}},
+
+{id:6, em:'🏭', title:'산업 혁명과 제국주의', relic:['⚙️','와트의 증기 기관'],
+ cho:[
+  ['토지를 잃은 농민이 도시로 몰려들게 만든 영국의 운동','인클로저 운동',['인클로저']],
+  ['증기 기관을 개량한 인물','제임스 와트',['와트']],
+  ['기계가 일자리를 빼앗는다고 생각한 노동자들의 기계 파괴 운동','러다이트 운동',['러다이트']],
+  ['노동자들이 자신의 이익을 대변하려고 만든 단체','노동조합'],
+  ['과학적 사회주의를 주장하고 ‘공산당 선언’을 제시한 인물','마르크스'],
+  ['약육강식·적자생존의 논리로 강대국의 침략을 정당화한 이론','사회 진화론'],
+  ['군대를 동원해 약소국을 침략하여 식민지로 만든 대외 정책','제국주의']],
+ quiz:[
+  ['산업 혁명이 가장 먼저 시작된 나라와 분야는?',['영국 – 면직물 공업','프랑스 – 철강 공업','독일 – 화학 공업','미국 – 자동차 공업'],'영국은 값싼 노동력, 풍부한 석탄과 철, 넓은 식민지를 갖추고 있었음.'],
+  ['산업 혁명으로 나타난 생산 방식의 변화는?',['가내 수공업 → 공장제 기계 공업','공장제 기계 공업 → 가내 수공업','농업 → 목축업','기계 공업 → 선대제 수공업'],'이로써 유럽은 농업 사회에서 산업 사회로 변함.'],
+  ['영국의 종단 정책과 프랑스의 횡단 정책이 충돌한 사건은?',['파쇼다 사건','모로코 사건','애로호 사건','사라예보 사건'],'모로코 사건은 독일과 프랑스의 대립임.'],
+  ['20세기 초 아프리카에서 식민지가 되지 않은 두 나라는?',['라이베리아, 에티오피아','이집트, 알제리','콩고, 리비아','카메룬, 토고'],'두 나라를 뺀 아프리카 전역이 서구 열강의 식민지가 됨.'],
+  ['산업 혁명으로 사회가 풍요로워졌고, 그 혜택을 모든 사람이 고르게 누렸다.',false,'노동자는 장시간 노동과 낮은 임금에 시달렸고 빈부 격차가 커짐.'],
+  ['오언, 생시몽 등은 계몽과 설득으로 이상 사회를 만들 수 있다는 공상적 사회주의를 주장하였다.',true,'마르크스는 혁명을 통해서만 변화가 가능하다는 과학적 사회주의를 주장함.']],
+ sp:{type:'match', title:'제국주의 열강과 침략 내용을 짝지어 보자', pairs:[
+  ['영국','이집트와 남아프리카를 잇는 종단 정책'],['프랑스','알제리와 마다가스카르를 잇는 횡단 정책'],['벨기에','콩고를 식민지로 삼음'],['이탈리아','리비아를 식민지로 삼음'],['미국','에스파냐와 싸워 이겨 필리핀 차지'],['네덜란드','인도네시아 자와섬 침략']]}},
+
+{id:7, em:'🐉', title:'중국의 국민 국가 건설', relic:['🏮','광저우 항구의 등불'],
+ cho:[
+  ['청의 허가를 받아 광저우에서 외국과의 무역을 맡은 상인','공행'],
+  ['광저우에 파견되어 아편을 몰수하고 불태운 인물','임칙서'],
+  ['제1차 아편 전쟁의 결과 맺은 조약 (5개 항구 개항, 홍콩섬 할양)','난징 조약'],
+  ['상제회를 조직하고 태평천국을 세운 인물','홍수전'],
+  ['중국의 전통은 지키고 서양의 기술만 받아들이자는 양무운동의 원칙','중체서용'],
+  ['의화단이 내건 구호','부청멸양'],
+  ['동맹회를 조직하고 삼민주의를 내세운 인물','쑨원']],
+ quiz:[
+  ['제2차 아편 전쟁의 구실이 된 사건은?',['애로호 사건','운요호 사건','파쇼다 사건','사라예보 사건'],'영국은 애로호 사건을 구실로 프랑스와 연합하여 전쟁을 일으킴.'],
+  ['베이징 조약을 주선한 대가로 러시아가 넘겨받은 지역은?',['연해주','홍콩섬','구룡반도','랴오둥반도'],'구룡반도는 영국에 할양됨.'],
+  ['변법자강 운동에 대한 설명으로 알맞은 것은?',['캉유웨이 등이 메이지 유신을 본받아 입헌 군주제 도입을 시도함','이홍장 등이 서양의 무기와 기술만 도입함','홍수전이 토지 균등 분배를 주장함','백련교도를 중심으로 철도와 교회를 파괴함'],'변법자강 운동은 서태후와 보수파의 정변(무술정변)으로 실패함.'],
+  ['양무운동의 한계가 드러난 전쟁은?',['청·일 전쟁','러·일 전쟁','청·프 전쟁','제1차 아편 전쟁'],'제도는 그대로 둔 채 기술만 도입하려 한 한계가 청·일 전쟁 패배로 드러남.'],
+  ['신해혁명의 결과 수립된 중국 최초의 공화국은?',['중화민국','태평천국','중화 인민 공화국','청'],'쑨원을 임시 대총통으로 선출하고 난징에 중화민국을 수립함.'],
+  ['태평천국은 토지 균등 분배, 남녀평등, 변발·전족 금지 등을 내세웠다.',true,'태평천국은 멸만흥한을 주장하며 난징을 점령함.']],
+ sp:{type:'order', title:'청 말의 사건을 일어난 순서대로 놓아 보자', items:[
+  '제1차 아편 전쟁과 난징 조약','태평천국 운동','양무운동','변법자강 운동','의화단 운동','신해혁명']}},
+
+{id:8, em:'⛩️', title:'일본과 조선의 국민 국가 건설', relic:['📰','만민 공동회의 연설문'],
+ cho:[
+  ['함대를 이끌고 와 일본에 개항을 요구한 미국의 제독','페리'],
+  ['메이지 정부가 번을 없애고 현을 두어 중앙 집권 체제를 세운 조치','폐번치현'],
+  ['러시아가 프랑스, 독일과 함께 일본에 랴오둥반도 반환을 요구한 사건','삼국 간섭'],
+  ['운요호 사건을 계기로 1876년 조선이 일본과 맺은 조약','강화도 조약',['조일 수호 조규']],
+  ['조선이 개화 정책으로 창설한 신식 군대','별기군'],
+  ['제1차 갑오개혁을 추진한 개혁 기구','군국기무처'],
+  ['1905년 일본이 조선의 외교권을 빼앗은 조약','을사조약',['을사늑약']]],
+ quiz:[
+  ['제국 헌법에 나타난 일본의 모습은?',['천황 중심의 입헌 군주제','국민 주권의 공화제','막부 중심의 봉건제','의회 중심의 내각 책임제'],'제국 헌법은 입법권, 조약 체결권, 군 통수권 등을 천황에게 부여함.'],
+  ['러·일 전쟁의 결과 체결된 조약은?',['포츠머스 강화 조약','시모노세키 조약','난징 조약','강화도 조약'],'시모노세키 조약은 청·일 전쟁의 결과 체결됨.'],
+  ['급진 개화파에 대한 설명으로 알맞은 것은?',['일본의 메이지 유신을 본받고 청의 내정 간섭에 반대함','청의 양무운동을 본받고 청과의 우호를 중시함','서양과의 통상을 모두 거부함','우리 제도는 지키고 서양 기술만 받아들이자고 함'],'김옥균, 박영효 등 급진 개화파는 문명개화론을 내세워 갑신정변을 일으킴.'],
+  ['을미개혁의 내용으로 알맞은 것은?',['태양력 사용, 단발령','과거제 폐지, 신분제 폐지','홍범 14조 반포','대한국 국제 반포'],'과거제·신분제 폐지는 제1차, 홍범 14조는 제2차 갑오개혁의 내용임.'],
+  ['갑신정변은 청군의 개입으로 3일 만에 실패하였다.',true,'우정총국 개국 축하연에서 정변을 일으켜 개화당 정부를 세웠으나 3일 만에 끝남.'],
+  ['강화도 조약은 조선과 일본이 대등한 위치에서 맺은 평등 조약이었다.',false,'연해 측량권, 영사 재판권(치외 법권)을 허용한 불평등 조약임.']],
+ sp:{type:'order', title:'조선의 사건을 일어난 순서대로 놓아 보자', items:[
+  '강화도 조약 체결','갑신정변','동학 농민 운동과 갑오개혁','을미개혁','대한제국 수립','을사조약 체결','한·일 병합 조약 체결']}},
+
+{id:9, em:'🐘', title:'인도와 서아시아의 국민 국가 건설', relic:['🚢','수에즈 운하를 지나는 배'],
+ cho:[
+  ['영국 동인도 회사가 고용한 인도인 용병','세포이'],
+  ['영국이 프랑스를 몰아내고 벵골 지역 통치권을 차지한 전투','플라시 전투',['플라시']],
+  ['1905년 영국이 인도를 분열시키려고 발표한 법령','벵골 분할령'],
+  ['오스만 제국이 유럽의 제도를 받아들여 추진한 근대적 개혁','탄지마트'],
+  ['『쿠란』의 가르침으로 돌아가자는 이슬람 개혁 운동','와하브 운동',['와하브']],
+  ['19세기 중반 이집트가 건설한 운하','수에즈 운하'],
+  ['1908년 혁명을 일으켜 오스만 제국의 헌법을 부활시킨 단체','청년 튀르크 당']],
+ quiz:[
+  ['세포이의 항쟁 결과로 알맞은 것은?',['동인도 회사 해체, 영국령 인도 제국 수립','인도의 완전한 독립','무굴 제국의 부흥','벵골 분할령 취소'],'영국은 무굴 제국 황제를 폐위하고 인도를 직접 통치함.'],
+  ['콜카타 대회에서 인도 국민 회의가 내세운 4대 강령이 아닌 것은?',['영국과의 우호 증진','영국 상품 불매','스와라지','스와데시'],'4대 강령은 영국 상품 불매, 스와라지, 스와데시, 민족 교육임.'],
+  ['영국이 벵골 분할령을 발표한 목적은?',['힌두교도와 이슬람교도를 분리하여 저항 세력을 약화하려고','벵골 지역의 산업을 발전시키려고','인도의 자치를 허용하려고','동인도 회사를 지원하려고'],'인도 국민 회의가 반발하여 전국으로 확산되자 분할령은 취소됨.'],
+  ['이란에서 담배 불매 운동이 일어난 까닭은?',['카자르 왕조가 영국에 담배 독점 판매권을 넘겨서','영국이 수에즈 운하를 차지해서','러시아가 담배 재배를 금지해서','오스만 제국이 담배세를 올려서'],'이후 이란에서는 헌법을 제정하고 의회를 세우는 입헌 혁명이 일어남.'],
+  ['인도 국민 회의는 처음부터 영국에 저항하려고 만든 반영 단체였다.',false,'처음에는 영국이 결성을 지원한 친영 단체였으나, 벵골 분할령 이후 반영 단체로 바뀜.']],
+ sp:{type:'match', title:'서아시아·이집트의 움직임과 설명을 짝지어 보자', pairs:[
+  ['탄지마트','오스만 제국의 근대적 개혁'],['청년 튀르크 당','혁명으로 헌법을 부활시킴'],['와하브 운동','『쿠란』으로 돌아가자'],['담배 불매 운동','이란의 반영 운동'],['무함마드 알리','이집트의 근대화 정책 추진'],['아라비 파샤','이집트의 반영 투쟁, 헌법 제정']]}},
+
+{id:10, em:'🪖', title:'제1차 세계 대전과 러시아 혁명', relic:['🪖','참호 속의 철모'],
+ cho:[
+  ['독일, 오스트리아-헝가리 제국, 이탈리아가 맺은 동맹','삼국 동맹',['3국 동맹']],
+  ['영국, 프랑스, 러시아가 맺은 협력 관계','삼국 협상',['3국 협상']],
+  ['오스트리아-헝가리 제국의 황태자가 세르비아계 청년에게 암살당한 사건','사라예보 사건',['사라예보']],
+  ['군인뿐 아니라 후방의 국민까지 모두 동원하는 전쟁 방식','총력전'],
+  ['영국의 해상 봉쇄에 맞서 독일이 펼친 작전','무제한 잠수함 작전'],
+  ['볼셰비키를 이끌고 10월 혁명을 일으킨 인물','레닌'],
+  ['레닌이 경제난을 해결하려고 자본주의적 요소를 일부 허용한 정책','신경제 정책',['NEP','네프']]],
+ quiz:[
+  ['영국의 3C 정책과 충돌한 독일의 정책은?',['3B 정책','종단 정책','횡단 정책','대륙 봉쇄령'],'3B는 베를린, 비잔티움, 바그다드를 잇는 정책임.'],
+  ['강대국들이 충돌하여 ‘유럽의 화약고’라 불린 지역은?',['발칸반도','이베리아반도','크림반도','이탈리아반도'],'발칸반도에서 범슬라브주의와 범게르만주의가 충돌함.'],
+  ['미국이 제1차 세계 대전에 참전한 계기는?',['치머만 전보 사건과 미국 선박 침몰','사라예보 사건','진주만 공습','피의 일요일 사건'],'미국의 참전으로 전황이 연합국에 유리해짐.'],
+  ['러시아 2월 혁명(1917)의 결과는?',['로마노프 왕조 붕괴, 임시 정부 수립','소련 결성','농노 해방령 발표','독일과 강화 조약 체결'],'노동자와 병사들이 소비에트를 조직하여 봉기함.'],
+  ['스탈린이 실시한 정책은?',['경제 개발 5개년 계획, 농업 집단화','신경제 정책(NEP)','농노 해방령','뉴딜 정책'],'스탈린은 독재 체제와 사회주의 통제 경제를 강화함.'],
+  ['러시아는 혁명이 일어난 뒤 독일과 강화 조약을 맺고 전쟁에서 빠졌다.',true,'10월 혁명 뒤 레닌은 독일과 강화 조약을 맺어 전쟁을 중단함.']],
+ sp:{type:'order', title:'제1차 세계 대전의 흐름을 순서대로 놓아 보자', items:[
+  '사라예보 사건','오스트리아-헝가리 제국이 세르비아에 선전 포고','독일의 벨기에 침공, 참호전으로 장기화','독일의 무제한 잠수함 작전','미국의 참전','빌헬름 2세 퇴위, 휴전 조약 체결']}},
+
+{id:11, em:'📉', title:'베르사유 체제, 대공황, 전체주의', relic:['📉','폭락하는 주가 그래프'],
+ cho:[
+  ['윌슨이 제안한, 각 민족이 스스로 운명을 결정해야 한다는 원칙','민족 자결주의'],
+  ['제1차 세계 대전의 승전국이 패전국 독일과 맺은 조약','베르사유 조약'],
+  ['윌슨의 제안에 따라 만들어진 국제 평화 기구','국제 연맹'],
+  ['루스벨트 대통령이 대공황을 극복하려고 실시한 정책','뉴딜 정책',['뉴딜']],
+  ['국가와 민족 전체의 이익을 위해 개인의 희생을 강조하는 사상','전체주의'],
+  ['파시스트당을 이끌고 이탈리아의 정권을 잡은 인물','무솔리니'],
+  ['1931년 일본이 대공황을 극복하려고 일으킨 침략','만주 사변']],
+ quiz:[
+  ['국제 연맹의 한계로 알맞은 것은?',['침략국을 억제할 무력 수단이 없었음','평화유지군의 힘이 지나치게 강했음','미국이 모든 결정을 독점함','패전국만 가입할 수 있었음'],'독일과 소련의 가입은 거부되었고, 미국도 의회의 반대로 참여하지 못함.'],
+  ['대공황이 일어난 배경은?',['생산은 늘었으나 소비가 따라가지 못해 재고가 쌓임','상품이 부족하여 물가가 폭등함','식민지가 모두 독립함','금과 은이 바닥남'],'재고가 쌓인 가운데 주가가 대폭락하면서 미국 경제가 급격히 나빠짐.'],
+  ['대공황 때 영국이 본국과 식민지를 묶어 만든 경제권은?',['파운드 블록','달러 블록','프랑 블록','마르크 블록'],'미국은 달러 블록, 프랑스는 프랑 블록을 형성함.'],
+  ['극단적인 인종주의와 반유대 정책을 내세운 독일의 정당과 지도자는?',['나치당 – 히틀러','파시스트당 – 무솔리니','볼셰비키 – 레닌','국민당 – 장제스'],'나치당은 대공황으로 인한 경제 위기 속에서 지지를 얻어 총선거에서 승리함.'],
+  ['국제 연맹 창설을 주도한 미국은 의회의 반대로 국제 연맹에 참여하지 못하였다.',true,'이는 국제 연맹의 힘을 약하게 만든 원인 중 하나임.'],
+  ['베르사유 조약은 패전국 독일의 처지를 충분히 배려하여 체결되었다.',false,'승전국의 이익에 따라 결정되어 독일은 식민지를 잃고 막대한 배상금을 물게 됨.']],
+ sp:{type:'match', title:'대공황 무렵 각 나라의 대응을 짝지어 보자', pairs:[
+  ['미국','뉴딜 정책, 달러 블록'],['영국','파운드 블록'],['프랑스','프랑 블록'],['이탈리아','무솔리니의 파시스트당 집권'],['독일','히틀러의 나치당 집권'],['일본','만주 사변을 일으킴']]}},
+
+{id:12, em:'🕊️', title:'제2차 세계 대전과 냉전', relic:['🕊️','평화의 비둘기'],
+ cho:[
+  ['1941년 12월 일본이 기습 공격한 미국의 해군 기지','진주만'],
+  ['1942년 미국이 일본에 승리하여 전세를 뒤집은 해전','미드웨이 해전',['미드웨이']],
+  ['1944년 연합국이 프랑스를 되찾으려고 감행한 작전','노르망디 상륙 작전',['노르망디']],
+  ['한국의 독립을 최초로 약속한 회담','카이로 회담',['카이로']],
+  ['제2차 세계 대전 뒤 평화유지군을 두고 창설된 국제기구','국제 연합',['UN','유엔']],
+  ['미국이 서유럽의 경제를 지원한 계획','마셜 플랜',['마셜 계획']],
+  ['1961년 베를린에 세워진 냉전의 상징','베를린 장벽']],
+ quiz:[
+  ['얄타 회담에서 논의·결정된 내용은?',['독일 처리 문제 논의, 소련의 대일 참전 약속','한국의 독립을 최초로 약속','일본에 항복을 요구','일본의 주권 회복 승인'],'한국 독립 약속은 카이로 회담, 일본에 대한 항복 요구는 포츠담 회담임.'],
+  ['독일이 소련을 침공한 뒤, 소련이 승리하여 전세를 바꾼 전투는?',['스탈린그라드 전투','워털루 전투','요크타운 전투','플라시 전투'],'독일은 1941년 독·소 불가침 조약을 깨고 소련을 침공함.'],
+  ['소련의 공산주의 팽창을 막겠다고 선언한 미국의 정책은?',['트루먼 독트린','마셜 플랜','뉴딜 정책','평화 원칙 14개조'],'미국은 이어 마셜 플랜으로 서유럽 경제를 지원하고 NATO를 창설함.'],
+  ['소련이 공산주의 국가 간의 동맹을 강화하려고 만든 기구는?',['바르샤바 조약 기구','북대서양 조약 기구(NATO)','국제 연맹','국제 연합'],'NATO는 미국을 중심으로 한 자유주의 진영의 집단 방위 기구임.'],
+  ['국공 내전에서 승리하여 중화 인민 공화국을 세운 인물은?',['마오쩌둥','장제스','쑨원','호찌민'],'국민당의 장제스는 타이완으로 밀려남.'],
+  ['쿠바 미사일 위기는 미국이 쿠바에 미사일 기지를 세우려 하면서 시작되었다.',false,'소련이 쿠바에 미사일 기지를 세우려 하자 미국이 쿠바 해상을 봉쇄함.']],
+ sp:{type:'order', title:'제2차 세계 대전의 흐름을 순서대로 놓아 보자', items:[
+  '독일의 프랑스 파리 점령','독일의 소련 침공','일본의 진주만 공습','미드웨이 해전','노르망디 상륙 작전','독일의 항복','원자 폭탄 투하와 일본의 항복']}}
+];
+
+/* ───────── 저장 ───────── */
+const KEY='wh_timemachine_v1';
+let mem={name:'',st:{}};
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d&&d.st)mem=d;}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(mem));}catch(e){}}
+
+/* ───────── 도구 ───────── */
+const app=document.getElementById('app');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+function mixed(a){ if(a.length<2) return a.slice(); let b; let n=0; do{b=shuffle(a);n++;}while(n<20&&b.every((x,i)=>x===a[i])); return b; }
+const norm=s=>String(s).toLowerCase().replace(/[^0-9a-z가-힣]/g,'');
+const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+const isH=c=>c>='가'&&c<='힣';
+const cho=c=>isH(c)?CHO[Math.floor((c.charCodeAt(0)-0xAC00)/588)]:c;
+const stars=n=>'<b>'+'★'.repeat(n)+'</b>'+'★'.repeat(3-n);
+const totalStars=()=>S.reduce((t,s)=>t+((mem.st[s.id]||{}).stars||0),0);
+const doneCount=()=>S.filter(s=>mem.st[s.id]).length;
+
+/* ───────── 홈 ───────── */
+function home(){
+  const ts=totalStars(), dc=doneCount();
+  app.innerHTML=`
+  <div class="hero"><span class="tag">역사① 복습 탐험</span>
+    <h1>세계사 <span>타임머신</span></h1>
+    <p>오스만 제국에서 냉전까지, 12개의 시대를 여행하며 유물을 모아 보자</p></div>
+  <div class="panel">
+    <div class="who"><label for="nm">탐험가</label><input id="nm" placeholder="학번과 이름 (예: 2305 홍길동)" value="${esc(mem.name)}" maxlength="20"></div>
+    <div class="stat"><span class="big">⭐ ${ts} / ${S.length*3}</span><div class="bar"><i style="width:${dc/S.length*100}%"></i></div><span>${dc} / ${S.length} 시대 완료</span></div>
+    <div class="relics">${S.map(s=>`<span class="${mem.st[s.id]?'on':''}" title="${esc(s.relic[1])}">${s.relic[0]}</span>`).join('')}</div>
+    <ul class="howto"><li>가고 싶은 시대부터 <b>아무 순서로나</b> 도전할 수 있음</li>
+      <li>시대마다 <b>초성 퀴즈 → 선택·OX 퀴즈 → 순서·짝 맞추기</b> 3가지 미션</li>
+      <li>한 번에 맞힐수록 별이 많아짐. 별 3개가 안 되면 다시 도전!</li></ul>
+  </div>
+  <div class="grid">${S.map(s=>{const r=mem.st[s.id];return `<button class="st ${r?'done':''}" data-id="${s.id}">
+      <span class="em">${s.em}</span><span><span class="no">${String(s.id).padStart(2,'0')}번째 시대</span><br><span class="ti">${esc(s.title)}</span><br><span class="stars">${stars(r?r.stars:0)}</span></span></button>`}).join('')}</div>
+  <div class="row">
+    <button class="btn ghost" id="note">📒 오답 노트</button>
+    ${dc===S.length?'<button class="btn" id="cert">🏆 수료증 보기</button>':''}
+    <button class="btn ghost" id="reset">기록 지우기</button>
+  </div>`;
+  document.getElementById('nm').addEventListener('input',e=>{mem.name=e.target.value.trim();save();});
+  app.querySelectorAll('.st').forEach(b=>b.onclick=()=>start(+b.dataset.id));
+  document.getElementById('note').onclick=note;
+  const c=document.getElementById('cert'); if(c) c.onclick=cert;
+  const r=document.getElementById('reset'); let armed=false;
+  r.onclick=()=>{ if(!armed){armed=true;r.textContent='한 번 더 누르면 모두 지워짐';setTimeout(()=>{armed=false;r.textContent='기록 지우기';},3000);} else {mem={name:mem.name,st:{}};save();home();} };
+  window.scrollTo(0,0);
+}
+
+/* ───────── 스테이션 진행 ───────── */
+let run=null;
+function start(id){
+  const s=S.find(x=>x.id===id);
+  const steps=[...shuffle(s.cho).map(d=>({t:'cho',d})),...shuffle(s.quiz).map(d=>({t:typeof d[1]==='boolean'?'ox':'mc',d})),{t:s.sp.type,d:s.sp}];
+  run={s,steps,i:0,pts:0,max:steps.length+1,missed:[]};
+  step();
+}
+function frame(kind,inner){
+  const {s,steps,i,pts}=run;
+  app.innerHTML=`<div class="top"><button class="back" id="bk">← 지도</button><span class="name">${s.em} ${esc(s.title)}</span><span class="pt">⭐ ${pts}점</span></div>
+   <div class="prog"><i style="width:${i/steps.length*100}%"></i></div>
+   <div class="card"><span class="kind">${kind} · ${i+1} / ${steps.length}</span>${inner}</div>`;
+  document.getElementById('bk').onclick=home;
+  window.scrollTo(0,0);
+}
+function nextBtn(){ return `<div class="next"><button class="btn" id="nx">${run.i+1<run.steps.length?'다음 ▶':'결과 보기 ▶'}</button></div>`; }
+function bindNext(){ const b=document.getElementById('nx'); b.onclick=()=>{run.i++; run.i<run.steps.length?step():finish();}; b.focus(); }
+function step(){ const st=run.steps[run.i]; ({cho:stepCho,mc:stepMc,ox:stepOx,order:stepOrder,match:stepMatch})[st.t](st.d); }
+
+/* 미션 1: 초성 퀴즈 */
+function stepCho(d){
+  const [clue,ans,alts=[]]=d; const okSet=new Set([ans,...alts].map(norm));
+  const chars=[...ans]; let open=0, wrong=0, hinted=false, over=false;
+  const hangulIdx=chars.map((c,i)=>isH(c)?i:-1).filter(i=>i>=0);
+  frame('미션 1 초성 퀴즈',`<div class="q">${esc(clue)}</div><div class="cho" id="cho"></div>
+    <div class="ans"><input id="in" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="정답 입력"><button class="btn" id="go">확인</button><button class="btn line" id="hint">💡 글자 힌트</button></div>
+    <div id="fb"></div>`);
+  const box=document.getElementById('cho'), inp=document.getElementById('in'), fb=document.getElementById('fb');
+  const draw=(all)=>{box.innerHTML=chars.map((c,i)=>c===' '?'<span class="sp"></span>':`<span class="${all||hangulIdx.indexOf(i)<open&&isH(c)?'open':''}">${esc(all||(isH(c)&&hangulIdx.indexOf(i)<open)?c:cho(c))}</span>`).join('');};
+  draw(false);
+  const end=(good)=>{over=true;draw(true);inp.disabled=true;document.getElementById('go').disabled=true;document.getElementById('hint').disabled=true;
+    const first=good&&wrong===0&&!hinted; if(first)run.pts++; else run.missed.push({q:clue,a:ans});
+    fb.innerHTML=`<div class="msg ${good?'ok':'no'}">${good?(first?'⭐ 정답! 한 번에 맞힘':'정답! (힌트나 재도전으로 맞혀 점수는 없음)'):'아쉬움! 정답은 <b>'+esc(ans)+'</b>'}</div>`+nextBtn(); bindNext();};
+  const check=()=>{ if(over)return; const v=norm(inp.value); if(!v)return;
+    if(okSet.has(v)) return end(true);
+    wrong++; if(wrong>=3) return end(false);
+    inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+    fb.innerHTML=`<div class="msg no">다시 생각해 보자! 남은 기회 ${3-wrong}번</div>`; inp.select(); };
+  document.getElementById('go').onclick=check;
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();check();}});
+  document.getElementById('hint').onclick=()=>{ if(over)return; hinted=true; if(open<hangulIdx.length-1){open++;draw(false);fb.innerHTML='<div class="msg tip">한 글자를 열었음. 힌트를 쓰면 이 문제의 점수는 받을 수 없음</div>';} else {fb.innerHTML='<div class="msg tip">더 열 수 있는 글자가 없음</div>';} inp.focus(); };
+  inp.focus();
+}
+
+/* 미션 2: 선택형 */
+function stepMc(d){
+  const [q,cs,ex]=d; const right=cs[0]; const opts=shuffle(cs);
+  frame('미션 2 골라 보기',`<div class="q">${esc(q)}</div><div class="opts">${opts.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}</div><div id="fb"></div>`);
+  app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    const pick=opts[+b.dataset.i]; const good=pick===right;
+    app.querySelectorAll('.opt').forEach(x=>{x.classList.add('lock'); if(opts[+x.dataset.i]===right)x.classList.add('good');});
+    if(!good)b.classList.add('bad');
+    judge(good,q,right,ex);
+  });
+}
+function stepOx(d){
+  const [q,ans,ex]=d;
+  frame('미션 2 OX 퀴즈',`<div class="q">${esc(q)}</div><div class="opts ox"><button class="opt" data-v="1" style="color:#2e6fd1">O</button><button class="opt" data-v="0" style="color:#d1495b">X</button></div><div id="fb"></div>`);
+  app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    const pick=b.dataset.v==='1'; const good=pick===ans;
+    app.querySelectorAll('.opt').forEach(x=>{x.classList.add('lock'); if((x.dataset.v==='1')===ans)x.classList.add('good');});
+    if(!good)b.classList.add('bad');
+    judge(good,q,ans?'O':'X',ex);
+  });
+}
+function judge(good,q,a,ex){
+  if(good)run.pts++; else run.missed.push({q,a,ex});
+  document.getElementById('fb').innerHTML=`<div class="msg ${good?'ok':'no'}"><b>${good?'⭐ 정답!':'아쉬움! 정답은 '+esc(a)}</b>${ex?'<br>'+esc(ex):''}</div>`+nextBtn(); bindNext();
+}
+
+/* 미션 3-가: 순서 맞추기 */
+function stepOrder(d){
+  const items=d.items; let pool=mixed(items), placed=[], tries=0, over=false, marks=null;
+  frame('미션 3 순서 맞추기',`<div class="q">${esc(d.title)}</div><div class="msg tip">아래 카드를 일어난 순서대로 누르자. 잘못 놓은 칸은 다시 누르면 빠짐</div>
+    <div class="slots" id="sl"></div><div class="pool" id="pl"></div>
+    <div class="next"><button class="btn" id="ck" disabled>확인</button></div><div id="fb"></div>`);
+  const sl=document.getElementById('sl'), pl=document.getElementById('pl'), ck=document.getElementById('ck'), fb=document.getElementById('fb');
+  const draw=()=>{
+    sl.innerHTML=items.map((_,i)=>placed[i]!==undefined?`<button class="slot ${marks?(marks[i]?'good':'bad'):''}" data-i="${i}"><i>${i+1}</i>${esc(placed[i])}</button>`:`<div class="slot empty"><i>${i+1}</i>여기에 놓임</div>`).join('');
+    pl.innerHTML=pool.map((p,i)=>`<button class="chip" data-i="${i}">${esc(p)}</button>`).join('');
+    ck.disabled=over||placed.length<items.length;
+    if(over)return;
+    sl.querySelectorAll('button.slot').forEach(b=>b.onclick=()=>{const i=+b.dataset.i; pool.push(...placed.splice(i)); marks=null; draw();});
+    pl.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{placed.push(pool.splice(+b.dataset.i,1)[0]); marks=null; draw();});
+  };
+  draw();
+  ck.onclick=()=>{
+    marks=placed.map((p,i)=>p===items[i]); const good=marks.every(Boolean); tries++;
+    if(good||tries>=3){ over=true; const got=good?(tries===1?2:tries===2?1:0):0; run.pts+=got;
+      if(!good){placed=items.slice();marks=items.map(()=>true);} if(got<2)run.missed.push({q:d.title,a:items.join(' → ')});
+      draw(); ck.style.display='none';
+      fb.innerHTML=`<div class="msg ${good?'ok':'no'}"><b>${good?(tries===1?'⭐⭐ 완벽! 한 번에 성공':'성공! '+tries+'번째 시도'):'올바른 순서를 위에 표시함. 한 번 더 읽어 보자'}</b></div>`+nextBtn(); bindNext();
+    } else { draw(); fb.innerHTML=`<div class="msg no">빨간 칸의 순서가 맞지 않음. 눌러서 뺀 뒤 다시 놓아 보자 (남은 기회 ${3-tries}번)</div>`; }
+  };
+}
+
+/* 미션 3-나: 짝 맞추기 */
+function stepMatch(d){
+  const L=shuffle(d.pairs.map(p=>p[0])), R=mixed(d.pairs.map(p=>p[1])); const map=new Map(d.pairs);
+  let sel=null, miss=0, left=d.pairs.length;
+  frame('미션 3 짝 맞추기',`<div class="q">${esc(d.title)}</div><div class="msg tip">왼쪽 카드를 누른 뒤, 알맞은 오른쪽 카드를 누르자</div>
+    <div class="cols"><div>${L.map((x,i)=>`<button class="mt l" data-i="${i}">${esc(x)}</button>`).join('')}</div><div>${R.map((x,i)=>`<button class="mt r" data-i="${i}">${esc(x)}</button>`).join('')}</div></div><div id="fb"></div>`);
+  const fb=document.getElementById('fb');
+  app.querySelectorAll('.mt.l').forEach(b=>b.onclick=()=>{app.querySelectorAll('.mt.l').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');sel=b;});
+  app.querySelectorAll('.mt.r').forEach(b=>b.onclick=()=>{
+    if(!sel){fb.innerHTML='<div class="msg tip">먼저 왼쪽 카드를 골라 보자</div>';return;}
+    if(map.get(L[+sel.dataset.i])===R[+b.dataset.i]){
+      sel.classList.remove('sel');sel.classList.add('fix');b.classList.add('fix');sel=null;left--;fb.innerHTML='';
+      if(left===0){const got=miss<=1?2:miss<=3?1:0; run.pts+=got; if(got<2)run.missed.push({q:d.title,a:d.pairs.map(p=>p[0]+' – '+p[1]).join(' / ')});
+        fb.innerHTML=`<div class="msg ok"><b>${got===2?'⭐⭐ 훌륭함! 모두 짝지음':'모두 짝지음! (틀린 횟수 '+miss+'번)'}</b></div>`+nextBtn(); bindNext();}
+    } else { miss++; b.classList.add('bad'); setTimeout(()=>b.classList.remove('bad'),500); fb.innerHTML='<div class="msg no">짝이 아님. 다시 골라 보자</div>'; }
+  });
+}
+
+/* ───────── 결과 ───────── */
+function finish(){
+  const {s,pts,max,missed}=run; const ratio=pts/max; const st=ratio>=.85?3:ratio>=.6?2:1;
+  const prev=mem.st[s.id]; const first=!prev;
+  mem.st[s.id]={stars:Math.max(st,prev?prev.stars:0),pts:Math.max(pts,prev?prev.pts:0),max,missed};
+  save();
+  const all=doneCount()===S.length;
+  app.innerHTML=`<div class="top"><button class="back" id="bk">← 지도</button><span class="name">${s.em} ${esc(s.title)}</span></div>
+  <div class="card res">
+    <div class="bigstars">${stars(st)}</div>
+    <div class="relic">${s.relic[0]}</div>
+    <h2>${first?'유물 획득!':'탐험 완료!'} 「${esc(s.relic[1])}」</h2>
+    <p><b>${pts}점</b> / ${max}점 ${st===3?'· 이 시대는 완벽하게 정복함':st===2?'· 조금만 더 하면 별 3개':'· 오답을 확인하고 다시 도전해 보자'}</p>
+    ${missed.length?`<div class="miss"><h3>📒 다시 볼 내용 ${missed.length}개</h3>${missed.map(m=>`<div>${esc(m.q)}<br><b>→ ${esc(m.a)}</b></div>`).join('')}</div>`:'<p>틀린 문제 없음!</p>'}
+  </div>
+  <div class="row"><button class="btn ghost" id="re">🔁 다시 도전</button><button class="btn" id="hm">🗺️ 지도로</button>${all?'<button class="btn" id="ct">🏆 수료증 보기</button>':''}</div>`;
+  document.getElementById('bk').onclick=home; document.getElementById('hm').onclick=home;
+  document.getElementById('re').onclick=()=>start(s.id);
+  const c=document.getElementById('ct'); if(c)c.onclick=cert;
+  window.scrollTo(0,0);
+}
+
+/* ───────── 오답 노트 ───────── */
+function note(){
+  const blocks=S.filter(s=>mem.st[s.id]&&mem.st[s.id].missed.length).map(s=>`<div class="sect"><h3>${s.em} ${esc(s.title)}</h3><div class="miss" style="margin-top:0">${mem.st[s.id].missed.map(m=>`<div>${esc(m.q)}<br><b>→ ${esc(m.a)}</b></div>`).join('')}</div>
+    <div class="row" style="justify-content:flex-start;margin-top:8px"><button class="btn line" data-id="${s.id}">이 시대 다시 도전</button></div></div>`).join('');
+  app.innerHTML=`<div class="top"><button class="back" id="bk">← 지도</button><span class="name">📒 오답 노트</span></div>
+   ${blocks||'<div class="card res"><div class="relic">🎉</div><h2>오답이 없음</h2><p>시대를 탐험하면서 틀린 문제가 생기면 여기에 모임</p></div>'}`;
+  document.getElementById('bk').onclick=home;
+  app.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>start(+b.dataset.id));
+  window.scrollTo(0,0);
+}
+
+/* ───────── 수료증 ───────── */
+function cert(){
+  const ts=totalStars(), mx=S.length*3; const d=new Date();
+  const rank=ts===mx?'전설의 시간 여행자':ts>=mx*.8?'일등 항해사':ts>=mx*.6?'숙련 탐험가':'새내기 탐험가';
+  app.innerHTML=`<div class="top"><button class="back" id="bk">← 지도</button><span class="name">🏆 수료증</span></div>
+  <div class="card"><div class="cert"><div class="t">세계사 타임머신</div><h2>탐험 수료증</h2>
+    <div class="nm">${esc(mem.name||'이름 없는 탐험가')}</div>
+    <p>위 탐험가는 오스만 제국에서 냉전까지 12개의 시대를 모두 여행하고<br>유물 12점을 모았으므로 이 증서를 수여함.</p>
+    <p style="font-size:26px">${S.map(s=>s.relic[0]).join(' ')}</p>
+    <p style="font-size:22px"><b>⭐ ${ts} / ${mx}</b> · 등급 <b>${rank}</b></p>
+    <p>${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일</p></div></div>
+  <div class="row">${ts<mx?'<button class="btn ghost" id="hm">별 3개에 다시 도전</button>':''}${FORM_URL?`<a class="btn" href="${esc(FORM_URL)}" target="_blank" rel="noopener" style="text-decoration:none">완료 제출하기</a>`:''}</div>`;
+  document.getElementById('bk').onclick=home; const h=document.getElementById('hm'); if(h)h.onclick=home;
+  window.scrollTo(0,0);
+}
+
+load(); home();
+</script>
+</body>
+</html>
