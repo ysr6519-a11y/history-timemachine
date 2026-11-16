@@ -470,7 +470,7 @@ function stepCho(d){
   const draw=(all)=>{box.innerHTML=chars.map((c,i)=>c===' '?'<span class="sp"></span>':`<span class="${all||hangulIdx.indexOf(i)<open&&isH(c)?'open':''}">${esc(all||(isH(c)&&hangulIdx.indexOf(i)<open)?c:cho(c))}</span>`).join('');};
   draw(false);
   const end=(good)=>{over=true;draw(true);inp.disabled=true;document.getElementById('go').disabled=true;document.getElementById('hint').disabled=true;
-    const first=good&&wrong===0&&!hinted; if(first)run.pts++; else run.missed.push({q:clue,a:ans,my:(tried.length?tried.join(', '):'')+(hinted?(tried.length?' (힌트 사용)':'힌트 사용'):'')+(good&&!first?' → 이후 정답':'')});
+    const first=good&&wrong===0&&!hinted; if(first)run.pts++; else run.missed.push({k:ans,q:clue,a:ans,my:(tried.length?tried.join(', '):'')+(hinted?(tried.length?' (힌트 사용)':'힌트 사용'):'')+(good&&!first?' → 이후 정답':'')});
     fb.innerHTML=`<div class="msg ${good?'ok':'no'}">${good?(first?'⭐ 정답! 한 번에 맞힘':'정답! (힌트나 재도전으로 맞혀 점수는 없음)'):'아쉬움! 정답은 <b>'+esc(ans)+'</b>'}</div>`+nextBtn(); bindNext();};
   const check=()=>{ if(over)return; const v=norm(inp.value); if(!v)return;
     if(okSet.has(v)) return end(true);
@@ -501,11 +501,11 @@ function stepOx(d){
     const pick=b.dataset.v==='1'; const good=pick===ans;
     app.querySelectorAll('.opt').forEach(x=>{x.classList.add('lock'); if((x.dataset.v==='1')===ans)x.classList.add('good');});
     if(!good)b.classList.add('bad');
-    judge(good,q,ans?'O':'X',ex,pick?'O':'X');
+    judge(good,q,ans?'O':'X',ex,pick?'O':'X','OX: '+(q.length>18?q.slice(0,18)+'…':q));
   });
 }
-function judge(good,q,a,ex,my){
-  if(good)run.pts++; else run.missed.push({q,a,ex,my});
+function judge(good,q,a,ex,my,k){
+  if(good)run.pts++; else run.missed.push({k:k||a,q,a,ex,my});
   document.getElementById('fb').innerHTML=`<div class="msg ${good?'ok':'no'}"><b>${good?'⭐ 정답!':'아쉬움! 정답은 '+esc(a)}</b>${ex?'<br>'+esc(ex):''}</div>`+nextBtn(); bindNext();
 }
 
@@ -528,7 +528,7 @@ function stepOrder(d){
   ck.onclick=()=>{
     marks=placed.map((p,i)=>p===items[i]); const good=marks.every(Boolean); tries++; if(tries===1) firstTry=placed.join(' → ');
     if(good||tries>=3){ over=true; const got=good?(tries===1?2:tries===2?1:0):0; run.pts+=got;
-      if(!good){placed=items.slice();marks=items.map(()=>true);} if(got<2)run.missed.push({q:d.title,a:items.join(' → '),my:'첫 시도: '+firstTry+(good?' → '+tries+'번째에 성공':' → 3번 모두 실패')});
+      if(!good){placed=items.slice();marks=items.map(()=>true);} if(got<2)run.missed.push({k:'순서 맞추기',q:d.title,a:items.join(' → '),my:'첫 시도: '+firstTry+(good?' → '+tries+'번째에 성공':' → 3번 모두 실패')});
       draw(); ck.style.display='none';
       fb.innerHTML=`<div class="msg ${good?'ok':'no'}"><b>${good?(tries===1?'⭐⭐ 완벽! 한 번에 성공':'성공! '+tries+'번째 시도'):'올바른 순서를 위에 표시함. 한 번 더 읽어 보자'}</b></div>`+nextBtn(); bindNext();
     } else { draw(); fb.innerHTML=`<div class="msg no">빨간 칸의 순서가 맞지 않음. 눌러서 뺀 뒤 다시 놓아 보자 (남은 기회 ${3-tries}번)</div>`; }
@@ -547,7 +547,7 @@ function stepMatch(d){
     if(!sel){fb.innerHTML='<div class="msg tip">먼저 왼쪽 카드를 골라 보자</div>';return;}
     if(map.get(L[+sel.dataset.i])===R[+b.dataset.i]){
       sel.classList.remove('sel');sel.classList.add('fix');b.classList.add('fix');sel=null;left--;fb.innerHTML='';
-      if(left===0){const got=miss<=1?2:miss<=3?1:0; run.pts+=got; if(got<2)run.missed.push({q:d.title,a:d.pairs.map(p=>p[0]+' – '+p[1]).join(' / '),my:'잘못 짝지음: '+wrongs.join('; ')});
+      if(left===0){const got=miss<=1?2:miss<=3?1:0; run.pts+=got; if(got<2)run.missed.push({k:'짝 맞추기',q:d.title,a:d.pairs.map(p=>p[0]+' – '+p[1]).join(' / '),my:'잘못 짝지음: '+wrongs.join('; ')});
         fb.innerHTML=`<div class="msg ok"><b>${got===2?'⭐⭐ 훌륭함! 모두 짝지음':'모두 짝지음! (틀린 횟수 '+miss+'번)'}</b></div>`+nextBtn(); bindNext();}
     } else { miss++; wrongs.push(L[+sel.dataset.i]+'–'+R[+b.dataset.i]); b.classList.add('bad'); setTimeout(()=>b.classList.remove('bad'),500); fb.innerHTML='<div class="msg no">짝이 아님. 다시 골라 보자</div>'; }
   });
@@ -557,11 +557,11 @@ function stepMatch(d){
 function finish(){
   if(run.done) return; run.done=true;
   const {s,pts,max,missed}=run; const ratio=pts/max; const st=ratio>=.85?3:ratio>=.6?2:1; const first=true;
-  if(run.i<run.steps.length) missed.push({q:'탐험을 끝까지 마치지 않음',a:'남은 문제는 점수 없음'});
+  if(run.i<run.steps.length) missed.push({k:'중간에 나감',q:'탐험을 끝까지 마치지 않음',a:'남은 문제는 점수 없음'});
   mem.st[s.id]={stars:st,pts,max,missed};
   save();
   sendScore({id:Date.now().toString(36)+Math.random().toString(36).slice(2,8),name:mem.name,no:s.id,title:s.title,pts,max,stars:st,
-    complete:run.i>=run.steps.length,missed:missed.map(m=>m.q+' [정답: '+m.a+(m.my?' / 학생 답: '+m.my:'')+']').join(' / '),total:totalStars()});
+    complete:run.i>=run.steps.length,missed:missed.map(m=>m.k||m.q).join(' / '),total:totalStars()});
   const all=doneCount()===S.length;
   app.innerHTML=`<div class="top"><button class="back" id="bk">← 지도</button><span class="name">${s.em} ${esc(s.title)}</span></div>
   <div class="card res">
