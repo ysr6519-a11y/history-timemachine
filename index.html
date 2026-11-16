@@ -142,6 +142,7 @@ h1,h2,h3{margin:0;line-height:1.25}
 /* ───────── 설정 ─────────
    완료 확인용 설문(구글 폼 등) 주소를 넣으면 수료증 화면에 '완료 제출하기' 버튼이 생김. 비워 두면 표시되지 않음. */
 const FORM_URL = "";
+const SCORE_URL = "https://script.google.com/macros/s/AKfycbzdSYKodps_uKT2s8g-AH_evdh1aYvMVOPKW2KOJ1P5Y2_I33u8JFIak7Sy6sIpyVwT/exec"; /* 점수를 교사 구글 시트로 보내는 주소 */
 
 /* ───────── 문제 데이터 ─────────
    cho : [단서, 정답, [인정 답안]]            → 초성 퀴즈
@@ -382,6 +383,15 @@ const KEY='wh_timemachine_v1';
 let mem={name:'',st:{}};
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d&&d.st)mem=d;}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(mem));}catch(e){}}
+/* ───────── 교사 시트로 점수 전송 (실패하면 보관했다가 다음에 다시 보냄) ───────── */
+const QKEY='wh_timemachine_q'; const inflight=new Set();
+function qGet(){try{return JSON.parse(localStorage.getItem(QKEY)||'[]');}catch(e){return [];}}
+function qSet(q){try{localStorage.setItem(QKEY,JSON.stringify(q));}catch(e){}}
+function sendScore(rec){ if(!SCORE_URL) return; const q=qGet(); q.push(rec); qSet(q); flush(); }
+function flush(){ if(!SCORE_URL) return; const q=qGet(); if(!q.length) return;
+  q.forEach(rec=>{ if(inflight.has(rec.id)) return; inflight.add(rec.id); fetch(SCORE_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(rec)})
+    .then(()=>{ qSet(qGet().filter(x=>x.id!==rec.id)); }).catch(()=>{}).finally(()=>inflight.delete(rec.id)); }); }
+window.addEventListener('online',flush);
 
 /* ───────── 도구 ───────── */
 const app=document.getElementById('app');
@@ -428,10 +438,11 @@ function home(){
 let run=null;
 function start(id){
   if(mem.st[id]) return home();
+  if(!mem.name){ alert('먼저 위의 탐험가 칸에 학번과 이름을 입력해 주세요.'); const n=document.getElementById('nm'); if(n) n.focus(); return; }
   const s=S.find(x=>x.id===id);
   const steps=[...shuffle(s.cho).map(d=>({t:'cho',d})),...shuffle(s.quiz).map(d=>({t:typeof d[1]==='boolean'?'ox':'mc',d})),{t:s.sp.type,d:s.sp}];
   run={s,steps,i:0,pts:0,max:steps.length+1,missed:[],done:false};
-  mem.st[s.id]={stars:1,pts:0,max:run.max,missed:[{q:'탐험을 끝까지 마치지 않음',a:'중간에 나가거나 새로 고침함'}]};
+  mem.st[s.id]={stars:1,pts:0,max:run.max,missed:[{q:'탐험을 끝까지 마치지 않음',a:'중간에 나가거나 새로 고침함'}],partial:true};
   save();
   step();
 }
@@ -549,6 +560,8 @@ function finish(){
   if(run.i<run.steps.length) missed.push({q:'탐험을 끝까지 마치지 않음',a:'남은 문제는 점수 없음'});
   mem.st[s.id]={stars:st,pts,max,missed};
   save();
+  sendScore({id:Date.now().toString(36)+Math.random().toString(36).slice(2,8),name:mem.name,no:s.id,title:s.title,pts,max,stars:st,
+    complete:run.i>=run.steps.length,missed:missed.map(m=>m.q).join(' / '),total:totalStars()});
   const all=doneCount()===S.length;
   app.innerHTML=`<div class="top"><button class="back" id="bk">← 지도</button><span class="name">${s.em} ${esc(s.title)}</span></div>
   <div class="card res">
@@ -589,7 +602,11 @@ function cert(){
   window.scrollTo(0,0);
 }
 
-load(); home();
+load();
+/* 새로 고침 등으로 중단된 시대도 교사 시트에 기록 */
+S.forEach(s=>{const r=mem.st[s.id]; if(r&&r.partial&&!r.sent){ r.sent=true; save();
+  sendScore({id:'p'+s.id+'_'+Date.now().toString(36),name:mem.name,no:s.id,title:s.title,pts:0,max:r.max,stars:r.stars,complete:false,missed:'새로 고침 등으로 중단됨',total:totalStars()}); }});
+home(); flush();
 </script>
 </body>
 </html>
