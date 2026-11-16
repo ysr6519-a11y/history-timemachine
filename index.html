@@ -56,7 +56,9 @@ h1,h2,h3{margin:0;line-height:1.25}
 .st .ti{font-size:19px;font-weight:800;line-height:1.25;word-break:keep-all}
 .st .stars{font-size:18px;letter-spacing:2px;color:#cfc7ad}
 .st .stars b{color:#f0a500}
-.st.done{box-shadow:0 0 0 3px var(--gold),0 6px 18px #0005}
+.st.done{box-shadow:0 0 0 3px var(--gold),0 6px 18px #0005;cursor:default}
+.st.done:active{transform:none}
+.st .lk{display:inline-block;margin-left:6px;font-size:13px;font-weight:800;color:#8a6d00}
 .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;justify-content:center}
 .btn{background:var(--gold);color:#3a2a00;font-weight:800;padding:13px 22px;border-radius:14px;font-size:18px;box-shadow:0 4px 0 #c9962a}
 .btn:active{transform:translateY(3px);box-shadow:0 1px 0 #c9962a}
@@ -407,30 +409,30 @@ function home(){
     <div class="relics">${S.map(s=>`<span class="${mem.st[s.id]?'on':''}" title="${esc(s.relic[1])}">${s.relic[0]}</span>`).join('')}</div>
     <ul class="howto"><li>가고 싶은 시대부터 <b>아무 순서로나</b> 도전할 수 있음</li>
       <li>시대마다 <b>초성 퀴즈 → 선택·OX 퀴즈 → 순서·짝 맞추기</b> 3가지 미션</li>
-      <li>한 번에 맞힐수록 별이 많아짐. 별 3개가 안 되면 다시 도전!</li></ul>
+      <li>한 번에 맞힐수록 별이 많아짐. <b>시대마다 한 번만 도전</b>할 수 있으니 신중하게!</li></ul>
   </div>
   <div class="grid">${S.map(s=>{const r=mem.st[s.id];return `<button class="st ${r?'done':''}" data-id="${s.id}">
-      <span class="em">${s.em}</span><span><span class="no">${String(s.id).padStart(2,'0')}번째 시대</span><br><span class="ti">${esc(s.title)}</span><br><span class="stars">${stars(r?r.stars:0)}</span></span></button>`}).join('')}</div>
+      <span class="em">${s.em}</span><span><span class="no">${String(s.id).padStart(2,'0')}번째 시대</span><br><span class="ti">${esc(s.title)}</span><br><span class="stars">${stars(r?r.stars:0)}</span>${r?'<span class="lk">🔒 완료</span>':''}</span></button>`}).join('')}</div>
   <div class="row">
     <button class="btn ghost" id="note">📒 오답 노트</button>
     ${dc===S.length?'<button class="btn" id="cert">🏆 수료증 보기</button>':''}
-    <button class="btn ghost" id="reset">기록 지우기</button>
   </div>`;
   document.getElementById('nm').addEventListener('input',e=>{mem.name=e.target.value.trim();save();});
-  app.querySelectorAll('.st').forEach(b=>b.onclick=()=>start(+b.dataset.id));
+  app.querySelectorAll('.st').forEach(b=>b.onclick=()=>{ if(mem.st[+b.dataset.id]) return; start(+b.dataset.id); });
   document.getElementById('note').onclick=note;
   const c=document.getElementById('cert'); if(c) c.onclick=cert;
-  const r=document.getElementById('reset'); let armed=false;
-  r.onclick=()=>{ if(!armed){armed=true;r.textContent='한 번 더 누르면 모두 지워짐';setTimeout(()=>{armed=false;r.textContent='기록 지우기';},3000);} else {mem={name:mem.name,st:{}};save();home();} };
   window.scrollTo(0,0);
 }
 
 /* ───────── 스테이션 진행 ───────── */
 let run=null;
 function start(id){
+  if(mem.st[id]) return home();
   const s=S.find(x=>x.id===id);
   const steps=[...shuffle(s.cho).map(d=>({t:'cho',d})),...shuffle(s.quiz).map(d=>({t:typeof d[1]==='boolean'?'ox':'mc',d})),{t:s.sp.type,d:s.sp}];
-  run={s,steps,i:0,pts:0,max:steps.length+1,missed:[]};
+  run={s,steps,i:0,pts:0,max:steps.length+1,missed:[],done:false};
+  mem.st[s.id]={stars:1,pts:0,max:run.max,missed:[{q:'탐험을 끝까지 마치지 않음',a:'중간에 나가거나 새로 고침함'}]};
+  save();
   step();
 }
 function frame(kind,inner){
@@ -438,7 +440,7 @@ function frame(kind,inner){
   app.innerHTML=`<div class="top"><button class="back" id="bk">← 지도</button><span class="name">${s.em} ${esc(s.title)}</span><span class="pt">⭐ ${pts}점</span></div>
    <div class="prog"><i style="width:${i/steps.length*100}%"></i></div>
    <div class="card"><span class="kind">${kind} · ${i+1} / ${steps.length}</span>${inner}</div>`;
-  document.getElementById('bk').onclick=home;
+  document.getElementById('bk').onclick=()=>{ if(confirm('지금 나가면 이 시대는 지금까지의 점수로 끝나고 다시 도전할 수 없음. 나갈까?')) finish(); };
   window.scrollTo(0,0);
 }
 function nextBtn(){ return `<div class="next"><button class="btn" id="nx">${run.i+1<run.steps.length?'다음 ▶':'결과 보기 ▶'}</button></div>`; }
@@ -542,9 +544,10 @@ function stepMatch(d){
 
 /* ───────── 결과 ───────── */
 function finish(){
-  const {s,pts,max,missed}=run; const ratio=pts/max; const st=ratio>=.85?3:ratio>=.6?2:1;
-  const prev=mem.st[s.id]; const first=!prev;
-  mem.st[s.id]={stars:Math.max(st,prev?prev.stars:0),pts:Math.max(pts,prev?prev.pts:0),max,missed};
+  if(run.done) return; run.done=true;
+  const {s,pts,max,missed}=run; const ratio=pts/max; const st=ratio>=.85?3:ratio>=.6?2:1; const first=true;
+  if(run.i<run.steps.length) missed.push({q:'탐험을 끝까지 마치지 않음',a:'남은 문제는 점수 없음'});
+  mem.st[s.id]={stars:st,pts,max,missed};
   save();
   const all=doneCount()===S.length;
   app.innerHTML=`<div class="top"><button class="back" id="bk">← 지도</button><span class="name">${s.em} ${esc(s.title)}</span></div>
@@ -552,24 +555,21 @@ function finish(){
     <div class="bigstars">${stars(st)}</div>
     <div class="relic">${s.relic[0]}</div>
     <h2>${first?'유물 획득!':'탐험 완료!'} 「${esc(s.relic[1])}」</h2>
-    <p><b>${pts}점</b> / ${max}점 ${st===3?'· 이 시대는 완벽하게 정복함':st===2?'· 조금만 더 하면 별 3개':'· 오답을 확인하고 다시 도전해 보자'}</p>
+    <p><b>${pts}점</b> / ${max}점 ${st===3?'· 이 시대는 완벽하게 정복함':st===2?'· 조금만 더 하면 별 3개':'· 아래 오답을 꼭 다시 읽어 보자'}</p>
     ${missed.length?`<div class="miss"><h3>📒 다시 볼 내용 ${missed.length}개</h3>${missed.map(m=>`<div>${esc(m.q)}<br><b>→ ${esc(m.a)}</b></div>`).join('')}</div>`:'<p>틀린 문제 없음!</p>'}
   </div>
-  <div class="row"><button class="btn ghost" id="re">🔁 다시 도전</button><button class="btn" id="hm">🗺️ 지도로</button>${all?'<button class="btn" id="ct">🏆 수료증 보기</button>':''}</div>`;
+  <div class="row"><button class="btn" id="hm">🗺️ 지도로</button>${all?'<button class="btn" id="ct">🏆 수료증 보기</button>':''}</div>`;
   document.getElementById('bk').onclick=home; document.getElementById('hm').onclick=home;
-  document.getElementById('re').onclick=()=>start(s.id);
   const c=document.getElementById('ct'); if(c)c.onclick=cert;
   window.scrollTo(0,0);
 }
 
 /* ───────── 오답 노트 ───────── */
 function note(){
-  const blocks=S.filter(s=>mem.st[s.id]&&mem.st[s.id].missed.length).map(s=>`<div class="sect"><h3>${s.em} ${esc(s.title)}</h3><div class="miss" style="margin-top:0">${mem.st[s.id].missed.map(m=>`<div>${esc(m.q)}<br><b>→ ${esc(m.a)}</b></div>`).join('')}</div>
-    <div class="row" style="justify-content:flex-start;margin-top:8px"><button class="btn line" data-id="${s.id}">이 시대 다시 도전</button></div></div>`).join('');
+  const blocks=S.filter(s=>mem.st[s.id]&&mem.st[s.id].missed.length).map(s=>`<div class="sect"><h3>${s.em} ${esc(s.title)}</h3><div class="miss" style="margin-top:0">${mem.st[s.id].missed.map(m=>`<div>${esc(m.q)}<br><b>→ ${esc(m.a)}</b></div>`).join('')}</div></div>`).join('');
   app.innerHTML=`<div class="top"><button class="back" id="bk">← 지도</button><span class="name">📒 오답 노트</span></div>
    ${blocks||'<div class="card res"><div class="relic">🎉</div><h2>오답이 없음</h2><p>시대를 탐험하면서 틀린 문제가 생기면 여기에 모임</p></div>'}`;
   document.getElementById('bk').onclick=home;
-  app.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>start(+b.dataset.id));
   window.scrollTo(0,0);
 }
 
@@ -584,8 +584,8 @@ function cert(){
     <p style="font-size:26px">${S.map(s=>s.relic[0]).join(' ')}</p>
     <p style="font-size:22px"><b>⭐ ${ts} / ${mx}</b> · 등급 <b>${rank}</b></p>
     <p>${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일</p></div></div>
-  <div class="row">${ts<mx?'<button class="btn ghost" id="hm">별 3개에 다시 도전</button>':''}${FORM_URL?`<a class="btn" href="${esc(FORM_URL)}" target="_blank" rel="noopener" style="text-decoration:none">완료 제출하기</a>`:''}</div>`;
-  document.getElementById('bk').onclick=home; const h=document.getElementById('hm'); if(h)h.onclick=home;
+  <div class="row">${FORM_URL?`<a class="btn" href="${esc(FORM_URL)}" target="_blank" rel="noopener" style="text-decoration:none">완료 제출하기</a>`:''}</div>`;
+  document.getElementById('bk').onclick=home; 
   window.scrollTo(0,0);
 }
 
